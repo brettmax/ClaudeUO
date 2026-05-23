@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# One-shot provisioning for a fresh Hetzner Cloud Ubuntu 24.04 host that will
+# One-shot provisioning for a fresh DigitalOcean Ubuntu 24.04 droplet that will
 # run the ClaudeUO ModernUO shard. Run as root (or with sudo).
 #
 # What it does:

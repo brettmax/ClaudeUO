@@ -8,7 +8,7 @@
                                        │ :2593
                                        ▼
  ┌────────────────────────────────────────────────────────────────────┐
- │                  Hetzner Cloud VPS (Ubuntu 24.04)                  │
+ │                DigitalOcean Droplet (Ubuntu 24.04)                 │
  │                                                                    │
  │  systemd: modernuo.service                                         │
  │   └─ dotnet ModernUO.dll                                           │
@@ -89,7 +89,7 @@ scheduler process because:
 
 ### Deploy: `deploy/`
 
-- `provision.sh` &mdash; one-shot Hetzner bootstrap (run once as root).
+- `provision.sh` &mdash; one-shot DigitalOcean droplet bootstrap (run once as root).
 - `modernuo.service` &mdash; systemd unit. Restart=always means a clean
   `Core.Kill(true)` shutdown cycles the process automatically.
 - `build.sh` &mdash; `dotnet build` ModernUO + overlay, copy assemblies.json.

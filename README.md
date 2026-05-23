@@ -17,7 +17,7 @@ ClaudeUO/
 │   ├── ClaudeUO.Admin/        # localhost-only admin TCP socket plugin
 │   └── Distribution-overlay/  # files merged into server/Distribution at build time
 ├── automation/          # restart scheduler + broadcast scripts (run on the host)
-├── deploy/              # Hetzner Ubuntu 24.04 provisioning + systemd unit
+├── deploy/              # DigitalOcean Ubuntu 24.04 provisioning + systemd unit
 ├── docs/                # architecture, deploy, restart-automation notes
 └── .github/workflows/   # CI + push-to-main → deploy + 6h restart countdown
 ```
@@ -25,7 +25,7 @@ ClaudeUO/
 ## Quick links
 
 - [Architecture](docs/ARCHITECTURE.md) &mdash; what runs where and how the pieces fit
-- [Deploy guide](deploy/README.md) &mdash; provisioning a fresh Hetzner host
+- [Deploy guide](deploy/README.md) &mdash; provisioning a fresh DigitalOcean droplet
 - [Restart automation](docs/RESTART_AUTOMATION.md) &mdash; broadcast schedule, manual ops
 
 ## Status / TODO
@@ -33,7 +33,7 @@ ClaudeUO/
 - [x] Submodules wired (ModernUO, ClassicUO, MobileUO)
 - [x] Custom admin socket plugin (`shard/ClaudeUO.Admin`)
 - [x] 6-hour restart countdown with 11 broadcasts &mdash; scripts under `automation/`
-- [x] Hetzner Ubuntu 24.04 provisioning + systemd unit
+- [x] DigitalOcean Ubuntu 24.04 provisioning + systemd unit
 - [x] GitHub Actions: CI build + on-push deploy that re-arms the countdown
 - [ ] **Pick an era / expansion.** Stock ModernUO ships with `expansions.json` set
   to "None". Edit `server/Distribution/Data/expansions.json` (or an overlay

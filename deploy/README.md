@@ -1,30 +1,51 @@
-# Deploy &mdash; Hetzner Cloud Ubuntu 24.04
+# Deploy &mdash; DigitalOcean Droplet, Ubuntu 24.04
 
 Provisioning the production shard.
 
 ## One-time host setup
 
-1. **Create a Hetzner Cloud server.** A `CX22` (2 vCPU, 4GB RAM) is plenty for a
-   bring-up; bump up once you have player numbers. Image: Ubuntu 24.04. Add
-   your SSH key during creation.
+1. **Create a DigitalOcean droplet.** A Basic droplet at `s-2vcpu-4gb`
+   (Regular Intel, ~$24/mo) is plenty for a bring-up; bump up once you have
+   player numbers. Image: **Ubuntu 24.04 (LTS) x64**. Add your SSH key during
+   creation so `ssh root@DROPLET_IP` just works.
 
-2. **Add a deploy key for the repo.** On your laptop:
+   Web console flow: <https://cloud.digitalocean.com/droplets/new>. Or with
+   [`doctl`](https://docs.digitalocean.com/reference/doctl/how-to/install/)
+   installed and authenticated:
+
+   ```bash
+   doctl compute droplet create claudeuo \
+     --region nyc3 --size s-2vcpu-4gb --image ubuntu-24-04-x64 \
+     --ssh-keys "$(doctl compute ssh-key list --format ID --no-header | head -1)" \
+     --wait
+   ```
+
+2. **Add a deploy key for the repo (private repo only).** Since the GitHub
+   repo is private, the droplet needs a key it can use to `git clone`. On your
+   laptop:
 
    ```bash
    ssh-keygen -t ed25519 -f ~/.ssh/claudeuo_deploy -C "claudeuo-deploy"
    ```
 
-   Add `~/.ssh/claudeuo_deploy.pub` as a deploy key on the GitHub repo (read
-   access is enough). Copy the private half onto the server as
-   `/home/claudeuo/.ssh/id_ed25519` later, or just clone over HTTPS.
+   - Add `~/.ssh/claudeuo_deploy.pub` as a **deploy key** at
+     <https://github.com/brettmax/ClaudeUO/settings/keys/new> (read-only is
+     enough; write access not needed since CI deploys via SSH, not push).
+   - On the droplet (after step 3), drop the private half into
+     `/home/claudeuo/.ssh/id_ed25519` (chmod 600, chown claudeuo).
 
 3. **SSH in as root, then provision:**
 
    ```bash
-   ssh root@YOUR_HETZNER_IP
-   export CLAUDEUO_REPO=https://github.com/YOUR_USER/ClaudeUO.git   # or git@... if using deploy key
-   curl -fsSL "https://raw.githubusercontent.com/YOUR_USER/ClaudeUO/main/deploy/provision.sh" | bash -s
+   ssh root@YOUR_DROPLET_IP
+   export CLAUDEUO_REPO=git@github.com:brettmax/ClaudeUO.git
+   curl -fsSL "https://raw.githubusercontent.com/brettmax/ClaudeUO/main/deploy/provision.sh" | bash -s
    ```
+
+   For the `curl` line to work on a private repo, the droplet needs the deploy
+   key in place *before* `provision.sh` runs &mdash; or run it via
+   `scp deploy/provision.sh root@DROPLET:/root/ && ssh root@DROPLET CLAUDEUO_REPO=... bash /root/provision.sh`
+   so the script itself doesn't need to be public-readable on GitHub.
 
    `provision.sh` installs .NET 10, creates the `claudeuo` user, clones the
    repo into `/opt/claudeuo`, builds, and starts `modernuo.service`.
@@ -48,7 +69,7 @@ Add these repository **secrets**:
 
 | Secret name | Value |
 | --- | --- |
-| `DEPLOY_HOST` | The Hetzner IP or DNS name |
+| `DEPLOY_HOST` | The droplet's public IP or DNS name |
 | `DEPLOY_USER` | `claudeuo` |
 | `DEPLOY_SSH_KEY` | Private key paired with a public key added to `/home/claudeuo/.ssh/authorized_keys` |
 | `DEPLOY_PORT` | (optional) defaults to `22` |

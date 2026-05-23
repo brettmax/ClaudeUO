@@ -21,7 +21,7 @@ port="${CLAUDEUO_ADMIN_PORT:-2595}"
 
 # Print the request, read one line of response, then close.
 # Requires bash's /dev/tcp; that's available on every supported distro
-# (Hetzner Ubuntu 24.04 ships bash 5.x with networking enabled).
+# (DigitalOcean's Ubuntu 24.04 image ships bash 5.x with networking enabled).
 exec 3<>"/dev/tcp/${host}/${port}"
 printf 'BROADCAST %d %s\n' "$hue" "$msg" >&3
 IFS= read -r reply <&3 || reply="(no reply)"
