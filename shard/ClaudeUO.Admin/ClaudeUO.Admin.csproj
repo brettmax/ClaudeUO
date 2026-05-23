@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>ClaudeUO.Admin</RootNamespace>
+    <AssemblyName>ClaudeUO.Admin</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Product>ClaudeUO Admin Socket</Product>
+    <Description>Localhost TCP control socket for external restart automation.</Description>
+
+    <!-- Drop our DLL into the same Distribution/ folder ModernUO publishes into.
+         The deploy step still has to add our assembly name to Distribution/Data/assemblies.json
+         (we ship an overlay copy alongside this project). -->
+    <OutDir>..\..\server\Distribution\</OutDir>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Reference ModernUO Server so we can call World.Broadcast, Core.Kill, CommandSystem, etc.
+         Private=false / IncludeAssets=None keeps Server.dll out of our output dir (already present). -->
+    <ProjectReference Include="..\..\server\Projects\Server\Server.csproj" Private="false" IncludeAssets="compile" />
+  </ItemGroup>
+
+</Project>

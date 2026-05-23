@@ -1,0 +1,33 @@
+[Unit]
+Description=ClaudeUO / ModernUO Server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=claudeuo
+Group=claudeuo
+WorkingDirectory=/opt/claudeuo/server/Distribution
+ExecStart=/usr/bin/dotnet /opt/claudeuo/server/Distribution/ModernUO.dll
+# ModernUO returns a non-zero exit code from Core.Kill(true) to signal "please
+# restart me". systemd brings the process back up within RestartSec, so the
+# shutdown broadcast / final Core.Kill triggered by the scheduler results in
+# a clean cycle.
+Restart=always
+RestartSec=10
+TimeoutStopSec=120
+KillSignal=SIGINT
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+
+# stdout/stderr to journal
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=modernuo
+
+[Install]
+WantedBy=multi-user.target

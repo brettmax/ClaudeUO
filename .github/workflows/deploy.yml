@@ -1,0 +1,58 @@
+name: Deploy &amp; Schedule Restart
+
+# Runs on every push to main. SSHes into the production host, has it pull
+# latest, rebuild, and (re)arm the 6-hour restart countdown. Subsequent pushes
+# during a countdown cancel the in-flight `at` jobs and start a fresh 6h timer
+# &mdash; matching the user-confirmed "timer resets on new push" behavior.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:        # also allow manual re-arming
+
+concurrency:
+  # Serialize so two pushes can't race the schedule-restart step.
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Sanity check secrets
+        run: |
+          for s in DEPLOY_HOST DEPLOY_USER DEPLOY_SSH_KEY; do
+            if [[ -z "${!s:-}" ]]; then
+              echo "::error::missing repository secret: $s"
+              exit 1
+            fi
+          done
+        env:
+          DEPLOY_HOST:    ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER:    ${{ secrets.DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Configure SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_HOST:    ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PORT:    ${{ secrets.DEPLOY_PORT }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          PORT="${DEPLOY_PORT:-22}"
+          ssh-keyscan -p "$PORT" -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Pull, build, and re-arm restart countdown
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          REF:         ${{ github.ref_name }}
+        run: |
+          PORT="${DEPLOY_PORT:-22}"
+          ssh -o StrictHostKeyChecking=yes -p "$PORT" \
+              "$DEPLOY_USER@$DEPLOY_HOST" \
+              "bash /opt/claudeuo/deploy/update-server.sh $REF"

@@ -1,0 +1,9 @@
+[submodule "server"]
+	path = server
+	url = https://github.com/modernuo/ModernUO.git
+[submodule "client"]
+	path = client
+	url = https://github.com/ClassicUO/ClassicUO.git
+[submodule "mobile"]
+	path = mobile
+	url = https://github.com/VoxelBoy/MobileUO.git

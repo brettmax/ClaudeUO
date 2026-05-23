@@ -1,0 +1,26 @@
+# .NET build output
+**/bin/
+**/obj/
+*.user
+*.suo
+
+# IDE
+.vs/
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Don't track ModernUO's runtime data / save files if a local dev run produces them
+server/Distribution/Saves/
+server/Distribution/Logs/
+
+# ClaudeUO.Admin DLL drops into server/Distribution as part of the build.
+# Don't track that either; the submodule already ignores it via its own .gitignore.
+server/Distribution/ClaudeUO.Admin*
+
+# Local secrets / config overrides
+*.local.json
+.env
